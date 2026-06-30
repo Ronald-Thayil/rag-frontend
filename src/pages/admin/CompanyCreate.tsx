@@ -1,17 +1,19 @@
-import { useNavigate } from 'react-router-dom';
-import { useCreateCompany } from '../../hooks/useCompanies';
-import { CompanyForm } from '../../components/Company/CompanyForm';
+import { useNavigate } from "react-router-dom";
+import { useCreateCompany } from "../../hooks/useCompanies";
+import {
+  CompanyForm,
+  CompanyFormValues,
+} from "../../components/Company/CompanyForm";
 
 export default function CompanyCreate() {
   const navigate = useNavigate();
   const createCompany = useCreateCompany();
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: CompanyFormValues) => {
     try {
       await createCompany.mutateAsync(data);
-      navigate('/admin/companies');
-    } catch {
-    }
+      navigate("/admin/companies");
+    } catch {}
   };
 
   return (

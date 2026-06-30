@@ -1,21 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { companyService } from '../services/company.service';
 import toast from 'react-hot-toast';
+import type { IApiResponse, PaginatedData } from '../types/api';
+import type { Company, CreateCompanyRequest, UpdateCompanyRequest } from '../types/company';
 
-export function useCompanies(params = {}) {
-  return useQuery({
+export function useCompanies(params?: Record<string, unknown>) {
+  return useQuery<IApiResponse<PaginatedData<Company>>>({
     queryKey: ['companies', params],
     queryFn: () => companyService.list(params),
-    select: (res) => res.data,
   });
 }
 
-export function useCompany(id) {
-  return useQuery({
+export function useCompany(id: string | undefined) {
+  return useQuery<IApiResponse<Company>>({
     queryKey: ['companies', id],
-    queryFn: () => companyService.getById(id),
+    queryFn: () => companyService.getById(id!),
     enabled: !!id,
-    select: (res) => res.data,
   });
 }
 
@@ -23,13 +23,13 @@ export function useCreateCompany() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data) => companyService.create(data),
+    mutationFn: (data: CreateCompanyRequest) => companyService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       toast.success('Company created successfully');
     },
-    onError: (error) => {
-      const msg = error.response?.data?.message || 'Failed to create company';
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to create company';
       toast.error(msg);
     },
   });
@@ -39,13 +39,13 @@ export function useUpdateCompany() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }) => companyService.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateCompanyRequest }) => companyService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       toast.success('Company updated successfully');
     },
-    onError: (error) => {
-      const msg = error.response?.data?.message || 'Failed to update company';
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to update company';
       toast.error(msg);
     },
   });
@@ -55,13 +55,13 @@ export function useDeleteCompany() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id) => companyService.delete(id),
+    mutationFn: (id: string) => companyService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       toast.success('Company deleted successfully');
     },
-    onError: (error) => {
-      const msg = error.response?.data?.message || 'Failed to delete company';
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to delete company';
       toast.error(msg);
     },
   });

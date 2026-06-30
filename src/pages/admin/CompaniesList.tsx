@@ -2,22 +2,23 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCompanies, useDeleteCompany } from '../../hooks/useCompanies';
 import { CompanyCard } from '../../components/Company/CompanyCard';
+import type { Company } from '../../types/company';
 
 export default function CompaniesList() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const limit = 20;
 
-  const params = { page, limit };
+  const params: Record<string, unknown> = { page, limit };
   if (search) params.search = search;
 
   const { data, isLoading, isError, error } = useCompanies(params);
   const deleteCompany = useDeleteCompany();
 
-  const companies = data?.data || [];
-  const totalPages = data?.totalPages || 1;
+  const companies: Company[] = data?.data?.data || [];
+  const totalPages = data?.data?.totalPages || 1;
 
-  const handleDelete = (id, name) => {
+  const handleDelete = (id: string, name: string) => {
     if (window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
       deleteCompany.mutate(id);
     }
@@ -51,14 +52,12 @@ export default function CompaniesList() {
 
       {isError && (
         <div className="text-center py-12 text-red-600">
-          Error loading companies: {error?.response?.data?.message || error.message}
+          Error loading companies: {(error as { response?: { data?: { message?: string } } })?.response?.data?.message || (error as Error).message}
         </div>
       )}
 
       {!isLoading && !isError && companies.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          No companies found.
-        </div>
+        <div className="text-center py-12 text-gray-500">No companies found.</div>
       )}
 
       {!isLoading && !isError && companies.length > 0 && (

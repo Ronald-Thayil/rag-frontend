@@ -1,6 +1,10 @@
 import { useAuth } from '../../hooks/useAuth';
 
-export function Header({ onMenuClick }) {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth();
 
   return (

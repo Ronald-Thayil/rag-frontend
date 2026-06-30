@@ -1,37 +1,36 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { login, isAuthenticated } = useAuth();
+  const { loginUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/dashboard';
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
   if (isAuthenticated) {
     navigate(from, { replace: true });
     return null;
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      await login(email, password, role);
+      await loginUser(email, password);
       toast.success('Logged in successfully');
       navigate(from, { replace: true });
-    } catch (err) {
-      const msg = err.response?.data?.message || 'Invalid email or password';
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Invalid email or password';
       setError(msg);
     } finally {
       setLoading(false);
@@ -42,9 +41,12 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-2xl font-bold text-center text-gray-900 mb-8">
-            Admin Console
+          <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">
+            Company Login
           </h1>
+          <p className="text-sm text-center text-gray-500 mb-8">
+            Sign in as a company user or company admin
+          </p>
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
@@ -83,21 +85,6 @@ export default function Login() {
               />
             </div>
 
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                Login as
-              </label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-
             <button
               type="submit"
               disabled={loading}
@@ -106,6 +93,13 @@ export default function Login() {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
+
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Platform admin?{' '}
+            <Link to="/login/admin" className="text-indigo-600 hover:text-indigo-800 font-medium">
+              Sign in here
+            </Link>
+          </p>
         </div>
       </div>
     </div>

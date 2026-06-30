@@ -1,10 +1,35 @@
-import { useForm } from 'react-hook-form';
+import { useForm } from "react-hook-form";
 
-export function CompanyForm({ defaultValues, onSubmit, loading }) {
-  const { register, handleSubmit, formState: { errors } } = useForm({
+export interface CompanyFormValues {
+  name: string;
+  slug: string;
+  settings: {
+    max_users: number;
+    features: {
+      advanced_search: boolean;
+    };
+  };
+}
+
+interface CompanyFormProps {
+  defaultValues?: CompanyFormValues;
+  onSubmit: (data: CompanyFormValues) => Promise<void>;
+  loading?: boolean;
+}
+
+export function CompanyForm({
+  defaultValues,
+  onSubmit,
+  loading,
+}: CompanyFormProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CompanyFormValues>({
     defaultValues: defaultValues || {
-      name: '',
-      slug: '',
+      name: "",
+      slug: "",
       settings: {
         max_users: 50,
         features: { advanced_search: false },
@@ -15,12 +40,15 @@ export function CompanyForm({ defaultValues, onSubmit, loading }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="name"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
           Company Name *
         </label>
         <input
           id="name"
-          {...register('name', { required: 'Company name is required' })}
+          {...register("name", { required: "Company name is required" })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
         />
         {errors.name && (
@@ -29,16 +57,20 @@ export function CompanyForm({ defaultValues, onSubmit, loading }) {
       </div>
 
       <div>
-        <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="slug"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
           Slug *
         </label>
         <input
           id="slug"
-          {...register('slug', {
-            required: 'Slug is required',
+          {...register("slug", {
+            required: "Slug is required",
             pattern: {
               value: /^[a-z0-9-]+$/,
-              message: 'Slug must be lowercase letters, numbers, and hyphens only',
+              message:
+                "Slug must be lowercase letters, numbers, and hyphens only",
             },
           })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -49,14 +81,17 @@ export function CompanyForm({ defaultValues, onSubmit, loading }) {
       </div>
 
       <div>
-        <label htmlFor="max_users" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="max_users"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
           Max Users
         </label>
         <input
           id="max_users"
           type="number"
           min={1}
-          {...register('settings.max_users', { valueAsNumber: true })}
+          {...register("settings.max_users", { valueAsNumber: true })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
         />
       </div>
@@ -65,7 +100,7 @@ export function CompanyForm({ defaultValues, onSubmit, loading }) {
         <input
           id="advanced_search"
           type="checkbox"
-          {...register('settings.features.advanced_search')}
+          {...register("settings.features.advanced_search")}
           className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
         />
         <label htmlFor="advanced_search" className="text-sm text-gray-700">
@@ -78,7 +113,11 @@ export function CompanyForm({ defaultValues, onSubmit, loading }) {
         disabled={loading}
         className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {loading ? 'Saving...' : defaultValues ? 'Update Company' : 'Create Company'}
+        {loading
+          ? "Saving..."
+          : defaultValues
+            ? "Update Company"
+            : "Create Company"}
       </button>
     </form>
   );

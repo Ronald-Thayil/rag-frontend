@@ -1,16 +1,22 @@
-import axios from 'axios';
+import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+
+interface FailedQueueItem {
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+}
 
 const api = axios.create({
-  baseURL: `${API_URL}/api/v1`,
+  baseURL: `${API_BASE_URL}/api/v1`,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 api.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -18,31 +24,35 @@ api.interceptors.request.use(
     config.headers['X-Requested-With'] = 'XMLHttpRequest';
     return config;
   },
-  (error) => Promise.reject(error)
+  (error: AxiosError) => Promise.reject(error),
 );
 
 let isRefreshing = false;
-let failedQueue = [];
+let failedQueue: FailedQueueItem[] = [];
 
-const processQueue = (error, token = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else {
-      prom.resolve(token);
+      prom.resolve(token as string);
     }
   });
   failedQueue = [];
 };
 
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+  (response: AxiosResponse) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/refresh')
+    ) {
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         }).then((token) => {
           originalRequest.headers.Authorization = `Bearer ${token}`;
@@ -53,25 +63,11 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (!refreshToken) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-        return Promise.reject(error);
-      }
-
       try {
-        const { data } = await axios.post(`${API_URL}/api/auth/refresh`, {
-          refreshToken,
-        });
-
-        const newAccessToken = data.data.access_token;
-        const newRefreshToken = data.data.refresh_token;
+        const { data } = await api.post('/auth/refresh');
+        const newAccessToken: string = data.data.access_token;
 
         localStorage.setItem('accessToken', newAccessToken);
-        localStorage.setItem('refreshToken', newRefreshToken);
-
         api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
@@ -80,7 +76,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       } finally {
@@ -89,7 +85,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

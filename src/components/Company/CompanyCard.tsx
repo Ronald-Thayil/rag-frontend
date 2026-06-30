@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom';
+import type { Company } from '../../types/company';
 
-export function CompanyCard({ company }) {
+interface CompanyCardProps {
+  company: Company;
+}
+
+export function CompanyCard({ company }: CompanyCardProps) {
   return (
     <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
@@ -13,7 +18,7 @@ export function CompanyCard({ company }) {
           <p className="text-sm text-gray-500 mt-1">{company.slug}</p>
         </div>
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          {company.settings?.max_users || 'N/A'} users
+          {(company.settings as { max_users?: number })?.max_users ?? 'N/A'} users
         </span>
       </div>
 
