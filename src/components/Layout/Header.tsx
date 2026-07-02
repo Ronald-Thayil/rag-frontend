@@ -1,4 +1,4 @@
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from "../../hooks/useAuth";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -14,14 +14,24 @@ export function Header({ onMenuClick }: HeaderProps) {
         onClick={onMenuClick}
         aria-label="Toggle menu"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 6h16M4 12h16M4 18h16"
+          />
         </svg>
       </button>
 
       <div className="flex items-center gap-4 ml-auto">
         <span className="text-sm text-gray-600 hidden sm:block">
-          {user?.name || user?.email}
+          {user?.first_name + " " + user?.last_name || user?.email}
         </span>
         <button
           onClick={logout}

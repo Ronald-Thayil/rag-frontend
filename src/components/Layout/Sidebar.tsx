@@ -11,7 +11,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const role = user?.role;
 
   const isAdmin = role === "admin";
-  const canManageUsers = isAdmin || role === "company_admin";
+  const canManageUsers = role === "company_admin";
 
   return (
     <>

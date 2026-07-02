@@ -1,6 +1,6 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useCompany, useDeleteCompany } from '../../hooks/useCompanies';
-import type { Company } from '../../types/company';
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useCompany, useDeleteCompany } from "../../hooks/useCompanies";
+import type { Company } from "../../types/company";
 
 export default function CompanyDetail() {
   const { id } = useParams<{ id: string }>();
@@ -8,22 +8,30 @@ export default function CompanyDetail() {
   const { data, isLoading, isError } = useCompany(id);
   const deleteCompany = useDeleteCompany();
 
-  const company: Company | undefined = data?.data;
+  const company: Company | undefined = data?.data || undefined;
 
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete "${company?.name}"? This action cannot be undone.`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete "${company?.name}"? This action cannot be undone.`,
+      )
+    ) {
       deleteCompany.mutate(id!, {
-        onSuccess: () => navigate('/admin/companies'),
+        onSuccess: () => navigate("/admin/companies"),
       });
     }
   };
 
   if (isLoading) {
-    return <div className="text-center py-12 text-gray-500">Loading company...</div>;
+    return (
+      <div className="text-center py-12 text-gray-500">Loading company...</div>
+    );
   }
 
   if (isError || !company) {
-    return <div className="text-center py-12 text-red-600">Company not found.</div>;
+    return (
+      <div className="text-center py-12 text-red-600">Company not found.</div>
+    );
   }
 
   return (
@@ -65,13 +73,20 @@ export default function CompanyDetail() {
             <div>
               <dt className="text-sm text-gray-500">Max Users</dt>
               <dd className="text-sm font-medium text-gray-900">
-                {(company.settings as { max_users?: number })?.max_users ?? 'Not set'}
+                {(company.settings as { max_users?: number })?.max_users ??
+                  "Not set"}
               </dd>
             </div>
             <div>
               <dt className="text-sm text-gray-500">Advanced Search</dt>
               <dd className="text-sm font-medium text-gray-900">
-                {(company.settings as { features?: { advanced_search?: boolean } })?.features?.advanced_search ? 'Enabled' : 'Disabled'}
+                {(
+                  company.settings as {
+                    features?: { advanced_search?: boolean };
+                  }
+                )?.features?.advanced_search
+                  ? "Enabled"
+                  : "Disabled"}
               </dd>
             </div>
           </dl>

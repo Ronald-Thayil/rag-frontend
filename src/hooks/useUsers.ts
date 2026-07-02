@@ -7,14 +7,14 @@ import type { User, CreateUserRequest, UpdateUserRequest } from '../types/user';
 export function useUsers(params?: Record<string, unknown>, companyId?: string) {
   return useQuery<IApiResponse<PaginatedData<User>>>({
     queryKey: ['users', params, companyId],
-    queryFn: () => userService.list(params, companyId),
+    queryFn: () => userService.list(params, companyId).then(res => res.data),
   });
 }
 
 export function useUser(id: string | undefined, companyId?: string) {
   return useQuery<IApiResponse<User>>({
     queryKey: ['users', id],
-    queryFn: () => userService.getById(id!, companyId),
+    queryFn: () => userService.getById(id!, companyId).then(res => res.data),
     enabled: !!id,
   });
 }

@@ -2,8 +2,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import { useCompanies } from "../../../hooks/useCompanies";
 import { useUser, useUpdateUser } from "../../../hooks/useUsers";
-import { UserForm } from "../../../components/User/UserForm";
+import { UserForm, UserFormValues } from "../../../components/User/UserForm";
 import type { User, UpdateUserRequest } from "../../../types/user";
+import { Company } from "../../../types";
 
 export default function UserEdit() {
   const { id } = useParams<{ id: string }>();
@@ -14,19 +15,24 @@ export default function UserEdit() {
     ? (user as { company_id?: string })?.company_id
     : undefined;
 
-  const { data, isLoading, isError } = useUser(id);
-  const { data: companiesData } = useCompanies({ limit: 100 });
-  const companies = companiesData?.data?.data || [];
+  const { data, isLoading, isError } = useUser(id, companyId);
+  let companies: Company[] = [];
+  if (isAdmin) {
+    const { data: companiesData } = useCompanies({ limit: 100 });
+    companies = companiesData?.data?.data || [];
+  }
   const updateUser = useUpdateUser();
 
-  const userData: User | undefined = data?.data;
+  const userData: User | undefined = data?.data ?? undefined;
 
-  const onSubmit = async (formData: Record<string, unknown>) => {
+  const onSubmit = async (formData: UserFormValues) => {
     try {
+      //exclude company_id from formData
+      const { company_id, ...rest } = formData;
       await updateUser.mutateAsync({
         id: id!,
-        data: formData as unknown as UpdateUserRequest,
-        companyId: (formData.company_id as string) || companyId,
+        data: rest as unknown as UpdateUserRequest,
+        companyId: companyId,
       });
       navigate("/admin/users");
     } catch {}

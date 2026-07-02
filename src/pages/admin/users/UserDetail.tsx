@@ -15,7 +15,7 @@ export default function UserDetail() {
   const { data, isLoading, isError } = useUser(id, companyId);
   const deleteUser = useDeleteUser();
 
-  const userData: User | undefined = data?.data;
+  const userData: User | undefined = data?.data || undefined;
 
   const handleDelete = () => {
     if (
