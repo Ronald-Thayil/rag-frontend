@@ -12,3 +12,13 @@ export type {
   LoginAdminResponse,
   RefreshResponse,
 } from './auth';
+export type {
+  Document,
+  DocumentStatus,
+  DocumentStatusResponse,
+  UploadResult,
+  Chunk,
+  SourceResult,
+  QueryResponse,
+  QueryRequest,
+} from './document';

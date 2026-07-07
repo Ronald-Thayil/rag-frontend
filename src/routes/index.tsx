@@ -12,6 +12,9 @@ import UsersList from '../pages/admin/users/UsersList';
 import UserCreate from '../pages/admin/users/UserCreate';
 import UserEdit from '../pages/admin/users/UserEdit';
 import UserDetail from '../pages/admin/users/UserDetail';
+import DocumentsList from '../pages/documents/DocumentsList';
+import DocumentUpload from '../pages/documents/DocumentUpload';
+import AskAI from '../pages/ask-ai/AskAI';
 
 export function AppRoutes() {
   return (
@@ -40,6 +43,10 @@ export function AppRoutes() {
           <Route path="/admin/users/:id/edit" element={<UserEdit />} />
           <Route path="/admin/users/:id" element={<UserDetail />} />
         </Route>
+
+        <Route path="/documents" element={<DocumentsList />} />
+        <Route path="/documents/upload" element={<DocumentUpload />} />
+        <Route path="/ask-ai" element={<AskAI />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

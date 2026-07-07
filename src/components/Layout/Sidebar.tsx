@@ -12,6 +12,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
   const isAdmin = role === "admin";
   const canManageUsers = role === "company_admin";
+  const isCompanyMember = !isAdmin;
 
   return (
     <>
@@ -52,6 +53,40 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             <span>📊</span>
             Dashboard
           </NavLink>
+
+          {isCompanyMember && (
+            <NavLink
+              to="/documents"
+              onClick={onClose}
+              className={({ isActive }: { isActive: boolean }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-indigo-50 text-indigo-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`
+              }
+            >
+              <span>📄</span>
+              Documents
+            </NavLink>
+          )}
+
+          {isCompanyMember && (
+            <NavLink
+              to="/ask-ai"
+              onClick={onClose}
+              className={({ isActive }: { isActive: boolean }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-indigo-50 text-indigo-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`
+              }
+            >
+              <span>🤖</span>
+              Ask AI
+            </NavLink>
+          )}
 
           {isAdmin && (
             <NavLink
