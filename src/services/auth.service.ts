@@ -14,4 +14,7 @@ export const authService = {
 
   logout: () =>
     api.post<IApiResponse<null>>('/auth/logout'),
+
+  loginAsUser: (userId: string) =>
+    api.post<IApiResponse<LoginUserResponse>>(`/auth/login-as-user/${userId}`),
 };

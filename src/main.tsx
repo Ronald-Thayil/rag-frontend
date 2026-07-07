@@ -7,7 +7,7 @@ import { AuthProvider } from './context/AuthProvider'
 import App from './App.tsx'
 import './index.css'
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,

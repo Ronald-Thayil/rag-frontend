@@ -3,6 +3,7 @@ import { AuthContext, type ContextUser } from "./AuthContext";
 import { authService } from "../services/auth.service";
 import type { User } from "../types/user";
 import type { AuthUser } from "../types/admin";
+import { queryClient } from "../main";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.setItem("user", JSON.stringify(userData));
 
       setUser(userData);
+      queryClient.clear();
       return userData;
     },
     [],
@@ -53,6 +55,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.setItem("user", JSON.stringify(userData));
 
       setUser({ ...userData, role: "admin" });
+      queryClient.clear();
+      return userData;
+    },
+    [],
+  );
+
+  const loginAsUser = useCallback(
+    async (userId: string): Promise<ContextUser> => {
+      const { data } = await authService.loginAsUser(userId);
+      const { access_token, user: userData } = data.data as {
+        access_token: string;
+        user: User;
+      };
+
+      localStorage.setItem("accessToken", access_token);
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      setUser(userData);
+      queryClient.clear();
       return userData;
     },
     [],
@@ -66,6 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
       setUser(null);
+      queryClient.clear();
     }
   }, []);
 
@@ -73,7 +95,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loginUser, loginAdmin, logout, loading, isAuthenticated }}
+      value={{ user, loginUser, loginAdmin, loginAsUser, logout, loading, isAuthenticated }}
     >
       {children}
     </AuthContext.Provider>

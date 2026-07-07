@@ -1,4 +1,6 @@
 import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
+import toast from 'react-hot-toast';
+import { IApiResponse } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
 
@@ -43,10 +45,16 @@ const processQueue = (error: unknown, token: string | null = null) => {
 
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
-  async (error: AxiosError) => {
+  async (error: AxiosError<IApiResponse<null>>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-
-    if (
+    console.log(originalRequest._retry, "ronald")
+    console.log(originalRequest.url, "url")
+    // ignore when 401  from login api 
+    if (error.response?.status === 401 &&
+      originalRequest.url?.includes('/auth/login')) {
+      toast.error(error.response?.data.message || 'Bad Request');
+    }
+    else if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url?.includes('/auth/refresh')
@@ -82,6 +90,19 @@ api.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
+    }
+    // manage other code like 404, 400,500 and show toast message
+    else if (error.response?.status === 400) {
+      toast.error(error.response?.data.message || 'Bad Request');
+    }
+    else if (error.response?.status === 404) {
+      toast.error(error.response?.data.message || 'Not Found');
+    }
+    else if (error.response?.status === 500) {
+      toast.error(error.response?.data.message || 'Internal Server Error');
+    }
+    else {
+      toast.error('Something went wrong');
     }
 
     return Promise.reject(error);
